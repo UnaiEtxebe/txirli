@@ -35,28 +35,40 @@
             const [confetti, setConfetti] = useState([]);
             const [washers, setWashers] = useState([]);
             const [celebration, setCelebration] = useState(false);
+            const [hearts, setHearts] = useState([]);
+            const [spin, setSpin] = useState(0);
             
             const weddingDate = new Date('2025-11-29T00:00:00');
             
             useEffect(() => {
                 // Initialize confetti
-                const initialConfetti = Array.from({ length: 50 }, (_, i) => ({
+                const initialConfetti = Array.from({ length: 60 }, (_, i) => ({
                     id: i,
                     left: Math.random() * 100,
                     delay: Math.random() * 5,
                     duration: 3 + Math.random() * 2,
-                    color: ['#ff6b9d', '#c44569', '#ffa502', '#ff6348', '#5f27cd', '#00d2d3'][Math.floor(Math.random() * 6)]
+                    color: ['#ff6b9d', '#c44569', '#ffa502', '#ff6348', '#5f27cd', '#00d2d3', '#ffffff'][Math.floor(Math.random() * 7)]
                 }));
                 setConfetti(initialConfetti);
                 
                 // Initialize floating washers
-                const initialWashers = Array.from({ length: 8 }, (_, i) => ({
+                const initialWashers = Array.from({ length: 6 }, (_, i) => ({
                     id: i,
                     left: Math.random() * 90,
                     delay: Math.random() * 3,
-                    duration: 10 + Math.random() * 5
+                    duration: 12 + Math.random() * 6,
+                    type: i % 2 === 0 ? 'washer' : 'dryer'
                 }));
                 setWashers(initialWashers);
+                
+                // Initialize floating hearts
+                const initialHearts = Array.from({ length: 15 }, (_, i) => ({
+                    id: i,
+                    left: Math.random() * 100,
+                    delay: Math.random() * 4,
+                    duration: 8 + Math.random() * 4
+                }));
+                setHearts(initialHearts);
                 
                 const timer = setInterval(() => {
                     const now = new Date();
@@ -69,6 +81,7 @@
                             minutes: Math.floor((difference / 1000 / 60) % 60),
                             seconds: Math.floor((difference / 1000) % 60)
                         });
+                        setSpin(prev => (prev + 1) % 360);
                     } else {
                         setCelebration(true);
                         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -77,6 +90,72 @@
                 
                 return () => clearInterval(timer);
             }, []);
+            
+            const WasherSVG = ({ spinning = false }) => (
+                <svg width="80" height="80" viewBox="0 0 100 100" style={{ 
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',
+                    transform: spinning ? `rotate(${spin}deg)` : 'none',
+                    transition: 'transform 0.5s linear'
+                }}>
+                    <rect x="10" y="10" width="80" height="80" rx="8" fill="#f0f0f0" stroke="#667eea" strokeWidth="2"/>
+                    <rect x="15" y="15" width="70" height="15" rx="4" fill="#667eea"/>
+                    <circle cx="22" cy="22.5" r="2" fill="#ff6348"/>
+                    <circle cx="30" cy="22.5" r="2" fill="#ffa502"/>
+                    <circle cx="38" cy="22.5" r="2" fill="#00d2d3"/>
+                    <circle cx="50" cy="60" r="25" fill="#4a5568" stroke="#2d3748" strokeWidth="2"/>
+                    <circle cx="50" cy="60" r="20" fill="#667eea" opacity="0.3"/>
+                    <circle cx="50" cy="60" r="3" fill="#2d3748"/>
+                </svg>
+            );
+            
+            const DryerSVG = () => (
+                <svg width="80" height="80" viewBox="0 0 100 100" style={{ filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' }}>
+                    <rect x="10" y="10" width="80" height="80" rx="8" fill="#fff5f5" stroke="#c44569" strokeWidth="2"/>
+                    <rect x="15" y="15" width="70" height="15" rx="4" fill="#c44569"/>
+                    <circle cx="22" cy="22.5" r="2" fill="#ff6348"/>
+                    <circle cx="30" cy="22.5" r="2" fill="#ffa502"/>
+                    <rect x="20" y="35" width="60" height="50" rx="30" fill="#e0e0e0" stroke="#9e9e9e" strokeWidth="2"/>
+                    <circle cx="50" cy="60" r="15" fill="#c44569" opacity="0.2"/>
+                    <path d="M 40 60 Q 50 50, 60 60" stroke="#9e9e9e" strokeWidth="2" fill="none"/>
+                </svg>
+            );
+            
+            const CoupleIllustration = () => (
+                <svg width="200" height="200" viewBox="0 0 200 200" style={{ 
+                    filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))',
+                    animation: 'floatCouple 3s ease-in-out infinite'
+                }}>
+                    {/* Washer */}
+                    <g transform="translate(20, 60)">
+                        <rect x="0" y="0" width="60" height="60" rx="6" fill="#f0f0f0" stroke="#667eea" strokeWidth="2"/>
+                        <rect x="3" y="3" width="54" height="12" rx="3" fill="#667eea"/>
+                        <circle cx="37" cy="38" r="18" fill="#4a5568" stroke="#2d3748" strokeWidth="1.5"/>
+                        <circle cx="37" cy="38" r="14" fill="#667eea" opacity="0.4"/>
+                        {/* Wedding veil */}
+                        <path d="M 0 -10 Q 30 -20, 60 -10 L 60 0 L 0 0 Z" fill="#ffffff" opacity="0.8"/>
+                        <circle cx="30" cy="-15" r="8" fill="#ffffff" stroke="#ffd700" strokeWidth="2"/>
+                    </g>
+                    
+                    {/* Heart in the middle */}
+                    <g transform="translate(100, 90)">
+                        <path d="M 0,-5 C -8,-15 -25,-15 -25,0 C -25,10 0,25 0,25 C 0,25 25,10 25,0 C 25,-15 8,-15 0,-5 Z" 
+                              fill="#ff6b9d" stroke="#c44569" strokeWidth="2"
+                              style={{ animation: 'heartbeat 1.5s ease-in-out infinite' }}/>
+                    </g>
+                    
+                    {/* Dryer */}
+                    <g transform="translate(120, 60)">
+                        <rect x="0" y="0" width="60" height="60" rx="6" fill="#fff5f5" stroke="#c44569" strokeWidth="2"/>
+                        <rect x="3" y="3" width="54" height="12" rx="3" fill="#c44569"/>
+                        <rect x="8" y="20" width="44" height="36" rx="22" fill="#e0e0e0" stroke="#9e9e9e" strokeWidth="1.5"/>
+                        <circle cx="30" cy="38" r="10" fill="#c44569" opacity="0.3"/>
+                        {/* Bow tie */}
+                        <path d="M 20 -10 L 10 -15 L 15 -20 L 30 -15 L 45 -20 L 50 -15 L 40 -10 L 30 -12 Z" 
+                              fill="#2d3748" stroke="#000000" strokeWidth="1"/>
+                        <circle cx="30" cy="-12" r="3" fill="#667eea"/>
+                    </g>
+                </svg>
+            );
             
             return (
                 <div style={{
@@ -107,19 +186,34 @@
                         />
                     ))}
                     
-                    {/* Floating Washers */}
+                    {/* Floating Washers and Dryers */}
                     {washers.map(washer => (
                         <div
                             key={washer.id}
                             style={{
                                 position: 'absolute',
                                 left: `${washer.left}%`,
-                                fontSize: '40px',
                                 animation: `float ${washer.duration}s ease-in-out ${washer.delay}s infinite`,
-                                opacity: 0.3
+                                opacity: 0.2
                             }}
                         >
-                            🧺
+                            {washer.type === 'washer' ? <WasherSVG /> : <DryerSVG />}
+                        </div>
+                    ))}
+                    
+                    {/* Floating Hearts */}
+                    {hearts.map(heart => (
+                        <div
+                            key={heart.id}
+                            style={{
+                                position: 'absolute',
+                                left: `${heart.left}%`,
+                                fontSize: '30px',
+                                animation: `floatHeart ${heart.duration}s ease-in-out ${heart.delay}s infinite`,
+                                opacity: 0.4
+                            }}
+                        >
+                            💕
                         </div>
                     ))}
                     
@@ -127,16 +221,17 @@
                     <div style={{
                         textAlign: 'center',
                         zIndex: 10,
-                        background: 'rgba(255, 255, 255, 0.95)',
+                        background: 'rgba(255, 255, 255, 0.97)',
                         padding: '60px 40px',
                         borderRadius: '30px',
                         boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-                        maxWidth: '800px',
+                        maxWidth: '900px',
                         width: '100%',
-                        animation: 'bounce 2s ease-in-out infinite'
+                        animation: 'gentleBounce 3s ease-in-out infinite'
                     }}>
-                        <div style={{ fontSize: '80px', marginBottom: '20px', animation: 'spin 3s linear infinite' }}>
-                            🧺
+                        {/* Couple Illustration */}
+                        <div style={{ marginBottom: '30px' }}>
+                            <CoupleIllustration />
                         </div>
                         
                         <h1 style={{
@@ -145,7 +240,7 @@
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             backgroundClip: 'text',
-                            marginBottom: '20px',
+                            marginBottom: '15px',
                             fontWeight: '900',
                             textTransform: 'uppercase',
                             letterSpacing: '2px'
@@ -156,21 +251,36 @@
                         <h2 style={{
                             fontSize: 'clamp(24px, 4vw, 48px)',
                             color: '#667eea',
-                            marginBottom: '40px',
+                            marginBottom: '20px',
                             fontWeight: '700'
                         }}>
                             Is Getting Married! 💒💍
                         </h2>
+                        
+                        <div style={{
+                            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(196, 69, 105, 0.1))',
+                            padding: '20px',
+                            borderRadius: '15px',
+                            marginBottom: '40px',
+                            border: '2px solid rgba(102, 126, 234, 0.3)'
+                        }}>
+                            <p style={{ fontSize: '20px', color: '#667eea', fontWeight: 'bold', marginBottom: '10px' }}>
+                                🎊 THE BIG DAY 🎊
+                            </p>
+                            <p style={{ fontSize: '28px', color: '#764ba2', fontWeight: '900' }}>
+                                November 29, 2025
+                            </p>
+                        </div>
                         
                         {!celebration ? (
                             <>
                                 <p style={{
                                     fontSize: '24px',
                                     color: '#666',
-                                    marginBottom: '40px',
-                                    fontWeight: '500'
+                                    marginBottom: '30px',
+                                    fontWeight: '600'
                                 }}>
-                                    Countdown to the Big Rinse Cycle:
+                                    ⏰ Countdown to the Big Rinse Cycle ⏰
                                 </p>
                                 
                                 <div style={{
@@ -209,19 +319,104 @@
                                     ))}
                                 </div>
                                 
+                                {/* Fun Facts Section */}
                                 <div style={{
+                                    background: 'linear-gradient(to right, #fff5f5, #f0f5ff)',
+                                    padding: '30px',
+                                    borderRadius: '20px',
+                                    marginTop: '40px',
+                                    boxShadow: '0 5px 20px rgba(0,0,0,0.1)'
+                                }}>
+                                    <h3 style={{
+                                        fontSize: '28px',
+                                        color: '#667eea',
+                                        marginBottom: '25px',
+                                        fontWeight: '800'
+                                    }}>
+                                        🧺 Fun Laundry Love Facts 🧺
+                                    </h3>
+                                    
+                                    <div style={{
+                                        display: 'grid',
+                                        gap: '20px',
+                                        textAlign: 'left',
+                                        fontSize: '18px',
+                                        color: '#555'
+                                    }}>
+                                        <div style={{
+                                            background: 'white',
+                                            padding: '20px',
+                                            borderRadius: '12px',
+                                            borderLeft: '5px solid #667eea',
+                                            boxShadow: '0 3px 10px rgba(0,0,0,0.05)'
+                                        }}>
+                                            <strong style={{ color: '#667eea' }}>💍 From Spin Cycles to Wedding Aisles:</strong>
+                                            <p style={{ marginTop: '8px', lineHeight: '1.6' }}>
+                                                After countless loads of laundry and years of keeping things fresh, 
+                                                The Washer Guy is finally ready for the ultimate pairing!
+                                            </p>
+                                        </div>
+                                        
+                                        <div style={{
+                                            background: 'white',
+                                            padding: '20px',
+                                            borderRadius: '12px',
+                                            borderLeft: '5px solid #c44569',
+                                            boxShadow: '0 3px 10px rgba(0,0,0,0.05)'
+                                        }}>
+                                            <strong style={{ color: '#c44569' }}>🌀 Perfect Match Detected:</strong>
+                                            <p style={{ marginTop: '8px', lineHeight: '1.6' }}>
+                                                Just like a washer needs a dryer, this match was meant to be! 
+                                                Together they'll tumble through life's adventures.
+                                            </p>
+                                        </div>
+                                        
+                                        <div style={{
+                                            background: 'white',
+                                            padding: '20px',
+                                            borderRadius: '12px',
+                                            borderLeft: '5px solid #ffa502',
+                                            boxShadow: '0 3px 10px rgba(0,0,0,0.05)'
+                                        }}>
+                                            <strong style={{ color: '#ffa502' }}>🧼 Clean Slate Ahead:</strong>
+                                            <p style={{ marginTop: '8px', lineHeight: '1.6' }}>
+                                                Time to hang up the bachelor life and start a fresh cycle! 
+                                                This is one permanent press setting!
+                                            </p>
+                                        </div>
+                                        
+                                        <div style={{
+                                            background: 'white',
+                                            padding: '20px',
+                                            borderRadius: '12px',
+                                            borderLeft: '5px solid #5f27cd',
+                                            boxShadow: '0 3px 10px rgba(0,0,0,0.05)'
+                                        }}>
+                                            <strong style={{ color: '#5f27cd' }}>💕 No More Separated Loads:</strong>
+                                            <p style={{ marginTop: '8px', lineHeight: '1.6' }}>
+                                                From now on, it's all about mixed loads and shared cycles! 
+                                                Two hearts, one laundry basket! 🧺❤️
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Footer Messages */}
+                                <div style={{
+                                    marginTop: '40px',
                                     fontSize: '20px',
                                     color: '#764ba2',
                                     fontWeight: '600',
-                                    marginTop: '30px',
-                                    lineHeight: '1.6'
+                                    lineHeight: '1.8'
                                 }}>
-                                    <p>🎉 November 29, 2025 🎉</p>
-                                    <p style={{ marginTop: '10px', fontSize: '18px', color: '#888' }}>
-                                        From spin cycles to wedding aisles!
+                                    <p style={{ fontSize: '24px', marginBottom: '15px' }}>
+                                        🎉 Get Ready to Celebrate! 🎉
                                     </p>
-                                    <p style={{ marginTop: '10px', fontSize: '18px', color: '#888' }}>
-                                        This washer is about to get permanent pressed! 😄
+                                    <p style={{ fontSize: '18px', color: '#888' }}>
+                                        This washer is getting permanent pressed! 😄
+                                    </p>
+                                    <p style={{ fontSize: '18px', color: '#888', marginTop: '10px' }}>
+                                        Warning: May cause extreme happiness and occasional tears of joy! 😭💖
                                     </p>
                                 </div>
                             </>
@@ -230,12 +425,18 @@
                                 fontSize: '48px',
                                 animation: 'celebrate 1s ease-in-out infinite'
                             }}>
-                                <p style={{ fontSize: '64px', marginBottom: '20px' }}>🎊🎉🎊</p>
-                                <p style={{ fontSize: '36px', color: '#667eea', fontWeight: 'bold' }}>
+                                <p style={{ fontSize: '80px', marginBottom: '30px' }}>🎊💒🎉</p>
+                                <p style={{ fontSize: '48px', color: '#667eea', fontWeight: 'bold' }}>
                                     IT'S WEDDING DAY!
                                 </p>
-                                <p style={{ fontSize: '28px', color: '#764ba2', marginTop: '20px' }}>
-                                    The Washer Guy is officially OFF THE MARKET! 🧺💒
+                                <p style={{ fontSize: '32px', color: '#764ba2', marginTop: '30px', lineHeight: '1.5' }}>
+                                    The Washer Guy is officially OFF THE MARKET! 🧺💍
+                                </p>
+                                <p style={{ fontSize: '28px', color: '#c44569', marginTop: '20px' }}>
+                                    Time to hang up the "Single" sign! 
+                                </p>
+                                <p style={{ fontSize: '24px', color: '#888', marginTop: '20px' }}>
+                                    The cycle is complete! ✨
                                 </p>
                             </div>
                         )}
@@ -258,12 +459,35 @@
                                 }
                             }
                             
-                            @keyframes bounce {
+                            @keyframes floatHeart {
+                                0% {
+                                    transform: translateY(100vh) scale(0.5);
+                                    opacity: 0;
+                                }
+                                50% {
+                                    opacity: 0.6;
+                                }
+                                100% {
+                                    transform: translateY(-20vh) scale(1.2);
+                                    opacity: 0;
+                                }
+                            }
+                            
+                            @keyframes floatCouple {
                                 0%, 100% {
                                     transform: translateY(0);
                                 }
                                 50% {
-                                    transform: translateY(-20px);
+                                    transform: translateY(-15px);
+                                }
+                            }
+                            
+                            @keyframes gentleBounce {
+                                0%, 100% {
+                                    transform: translateY(0);
+                                }
+                                50% {
+                                    transform: translateY(-10px);
                                 }
                             }
                             
@@ -279,9 +503,11 @@
                             @keyframes pulse {
                                 0%, 100% {
                                     transform: scale(1);
+                                    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
                                 }
                                 50% {
-                                    transform: scale(1.1);
+                                    transform: scale(1.05);
+                                    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
                                 }
                             }
                             
@@ -294,6 +520,21 @@
                                 }
                                 75% {
                                     transform: scale(1.1) rotate(5deg);
+                                }
+                            }
+                            
+                            @keyframes heartbeat {
+                                0%, 100% {
+                                    transform: scale(1);
+                                }
+                                25% {
+                                    transform: scale(1.15);
+                                }
+                                50% {
+                                    transform: scale(1);
+                                }
+                                75% {
+                                    transform: scale(1.1);
                                 }
                             }
                         `}
